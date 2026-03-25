@@ -23,8 +23,12 @@ services:
       - ./reservation_system:/app/reservation_system
     networks:
       - hotel-network
+    # Explicitly run Uvicorn via `uv` to ensure uv-managed environment is used
+    command: ["uv", "run", "uvicorn", "reservation_system.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/"]
+      # Use `uv run python` to execute a small health probe inside the uv environment
+      test: ["CMD-SHELL", "uv run python -c \"import urllib.request,sys; r=urllib.request.urlopen('http://127.0.0.1:8000/api/'); sys.exit(0 if r.getcode()==200 else 1)\""]
       interval: 30s
       timeout: 10s
       retries: 3
