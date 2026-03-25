@@ -16,6 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
+from django.http import JsonResponse
+
+# drf-spectacular schema + UI
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,4 +28,18 @@ urlpatterns = [
     path('api/', include('reservations.urls')),
     # Hotels endpoints (e.g. /api/getListOfHotels/)
     path('api/', include('hotels.urls')),
+
+    # Schema & Swagger UI
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+
+    # Root redirect to docs
+    path('', RedirectView.as_view(url='/api/docs/', permanent=False)),
 ]
+
+
+def json_404(request, exception=None):
+    return JsonResponse({"error": "Endpoint not found", "status": 404}, status=404)
+
+# Point Django's handler404 to the JSON handler
+handler404 = 'reservation_system.reservation_system.urls.json_404'
