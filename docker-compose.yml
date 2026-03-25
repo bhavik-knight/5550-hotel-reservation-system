@@ -16,7 +16,11 @@ services:
       - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
       - ALLOWED_HOSTS=localhost,127.0.0.1,api
       - PYTHONPATH=reservation_system
-      - DATABASE_URL=postgresql://hotel_user:hotel_password@db:5432/hotel_db
+      - DB_NAME=${DB_NAME:-mcda5550_hotel_db}
+      - DB_USER=${DB_USER:-bhavik}
+      - DB_PASSWORD=${DB_PASSWORD:-Bhavik_zorin123}
+      - DB_HOST=db
+      - DB_PORT=3306
     depends_on:
       db:
         condition: service_healthy
@@ -37,26 +41,25 @@ services:
     restart: unless-stopped
 
   # ============================================
-  # PostgreSQL Database (Optional - for production)
-  # Uncomment to use PostgreSQL instead of SQLite3
-  # ============================================
-  # db:
-  #   image: postgres:16-alpine
-  #   container_name: hotel-reservation-db
-  #   environment:
-  #     POSTGRES_DB: hotel_db
-  #     POSTGRES_USER: hotel_user
-  #     POSTGRES_PASSWORD: hotel_password
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
-  #   networks:
-  #     - hotel-network
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U hotel_user"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   restart: unless-stopped
+  # MySQL 8.0 Database (local development)
+  db:
+    image: mysql:8.0
+    container_name: hotel-reservation-db
+    environment:
+      - MYSQL_DATABASE=${DB_NAME:-mcda5550_hotel_db}
+      - MYSQL_USER=${DB_USER:-bhavik}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-Bhavik_zorin123}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - hotel-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
   # ============================================
   # Redis Cache (Optional - for caching)
