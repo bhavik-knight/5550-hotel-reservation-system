@@ -18,7 +18,7 @@ services:
       - PYTHONPATH=reservation_system
       - DB_NAME=${DB_NAME:-mcda5550_hotel_db}
       - DB_USER=${DB_USER:-bhavik}
-      - DB_PASSWORD=${DB_PASSWORD:-Bhavik_zorin123}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=3306
     depends_on:
@@ -48,8 +48,8 @@ services:
     environment:
       - MYSQL_DATABASE=${DB_NAME:-mcda5550_hotel_db}
       - MYSQL_USER=${DB_USER:-bhavik}
-      - MYSQL_PASSWORD=${DB_PASSWORD:-Bhavik_zorin123}
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
     networks:
