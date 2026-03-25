@@ -1,66 +1,35 @@
-# Multi-stage build for optimized production image
-FROM python:3.14-slim as base
+# Base image that includes `uv` for dependency management
+FROM ghcr.io/astral/uv:latest as base
 
 # Set working directory
 WORKDIR /app
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+# Environment
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# ============================================
-# Build stage - Install dependencies with uv
-# ============================================
-FROM base as builder
-
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Copy project files
+# Copy dependency manifests first for efficient caching
 COPY pyproject.toml uv.lock ./
 
-# Create virtual environment with uv
-RUN ~/.cargo/bin/uv venv --python 3.14 && \
-    ~/.cargo/bin/uv pip install -r <(~/.cargo/bin/uv pip compile pyproject.toml --output-file -)
+# Use `uv` to create and sync the isolated environment
+RUN uv sync --yes
 
-# ============================================
-# Runtime stage - Minimal production image
-# ============================================
-FROM base as runtime
-
-# Copy virtual environment from builder
-COPY --from=builder /app/.venv /app/.venv
-
-# Set PATH to use virtual environment
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Copy project code
+# Copy application code
 COPY reservation_system/ ./reservation_system/
 
-# Create non-root user for security
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
-
+# Create a non-root user and fix permissions
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Run migrations
-RUN cd reservation_system && \
-    python manage.py migrate --noinput
+# Run migrations inside the uv environment
+RUN uv run python reservation_system/manage.py migrate --noinput
 
-# Expose port
+# Expose application port
 EXPOSE 8000
 
-# Health check
+# Healthcheck (uses uv run to ensure environment commands execute correctly)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/api/ || exit 1
+  CMD uv run python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/').read()" || exit 1
 
-# Start Uvicorn server
-CMD ["uvicorn", "reservation_system.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
+# Start the app via uv to ensure the uv-managed environment is used
+CMD ["uv", "run", "uvicorn", "reservation_system.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
 
