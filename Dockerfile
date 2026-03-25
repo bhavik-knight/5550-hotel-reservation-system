@@ -6,6 +6,8 @@ WORKDIR /app
 
 # Environment
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+# Ensure the project package is importable inside the container
+ENV PYTHONPATH=/app/reservation_system
 
 # Copy dependency manifests first for efficient caching
 COPY pyproject.toml uv.lock ./

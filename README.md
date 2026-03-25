@@ -43,9 +43,13 @@ Modern tooling
 API documentation
 -----------------
 
-1) GET /api/getListOfHotels/
+Function Name: getListOfHotels
 
-Description: Returns a structured list of hotels with essential metadata and available rooms.
+HTTP Method: GET
+
+Endpoint: `/api/getListOfHotels/`
+
+Description: This endpoint returns the list of hotels. The response is a clean, structured JSON list of hotel objects under the top-level `hotels` array (suitable for client rendering and automated validation).
 
 Sample response (200 OK):
 
@@ -146,6 +150,8 @@ docker run --rm -p 8000:8000 hotel_reservation_system:latest \
 
 Then open http://localhost:8000/api/getListOfHotels/ in your browser or `curl`.
 
+Note: the `docker-compose.yml` file sets `PYTHONPATH=reservation_system` for the `api` service and the `Dockerfile` sets `PYTHONPATH=/app/reservation_system`. If you run into import errors for `reservation_system.asgi` when starting the server locally, run the command above with the `PYTHONPATH=reservation_system` prefix or use `docker compose up --build` which already configures this for the container.
+
 Development setup (local, using `uv`)
 -----------------------------------
 
@@ -160,7 +166,8 @@ Quick start (examples):
 uv sync
 
 # 2) Run the development server with Uvicorn (reload enabled for code changes)
-uv run uvicorn reservation_system.asgi:application --reload --host 127.0.0.1 --port 8000
+# If Python cannot import the `reservation_system` package, prefix with `PYTHONPATH=reservation_system`
+PYTHONPATH=reservation_system uv run uvicorn reservation_system.asgi:application --reload --host 127.0.0.1 --port 8000
 ```
 
 Notes:

@@ -15,6 +15,7 @@ services:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
       - ALLOWED_HOSTS=localhost,127.0.0.1,api
+      - PYTHONPATH=reservation_system
       - DATABASE_URL=postgresql://hotel_user:hotel_password@db:5432/hotel_db
     depends_on:
       db:
