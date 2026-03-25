@@ -14,6 +14,9 @@ from django.core.asgi import get_asgi_application
 
 # Ensure the apps directory is in the path for deployment
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Add the project base dir so the `reservation_system` package is importable
+sys.path.insert(0, str(BASE_DIR))
+# Also add the apps directory for app imports
 sys.path.insert(0, str(BASE_DIR / 'apps'))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'reservation_system.settings')
