@@ -33,9 +33,12 @@ def _load_dotenv(path):
     except FileNotFoundError:
         pass
 
-# Try to load .env from project root
+# Try to load .env from project root and repository root (support both layouts)
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Load .env from the app root (next to manage.py)
 _load_dotenv(BASE_DIR / '.env')
+# Also attempt to load .env from the repository root (one level above)
+_load_dotenv(BASE_DIR.parent / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 APPS_DIR = BASE_DIR / 'apps'
