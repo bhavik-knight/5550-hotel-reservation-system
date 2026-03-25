@@ -21,4 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # This prefixes your endpoint so it becomes /api/reservationConfirmation/
     path('api/', include('reservations.urls')),
+    # Hotels endpoints (e.g. /api/getListOfHotels/)
+    path('api/', include('hotels.urls')),
 ]
