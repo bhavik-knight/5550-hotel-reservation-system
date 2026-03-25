@@ -12,9 +12,32 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import sys
 from pathlib import Path
+import os
+
+# Load a local .env file if present (simple loader, no extra dependency required)
+def _load_dotenv(path):
+    try:
+        with open(path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if '=' not in line:
+                    continue
+                key, val = line.split('=', 1)
+                key = key.strip()
+                val = val.strip().strip('"').strip("'")
+                # Only set if not already in environment
+                if key not in os.environ:
+                    os.environ[key] = val
+    except FileNotFoundError:
+        pass
+
+# Try to load .env from project root
+BASE_DIR = Path(__file__).resolve().parent.parent
+_load_dotenv(BASE_DIR / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 APPS_DIR = BASE_DIR / 'apps'
 
 # Add the 'apps' directory to the python path so you can import 'hotels' instead of 'apps.hotels'
@@ -84,11 +107,11 @@ WSGI_APPLICATION = 'reservation_system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mcda5580',
-        'USER': 'bhavik',
-        'PASSWORD': 'Bhavik_zorin123',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME', 'mcda5580'),
+        'USER': os.environ.get('DB_USER', 'bhavik'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
