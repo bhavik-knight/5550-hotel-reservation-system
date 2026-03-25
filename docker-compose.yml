@@ -1,0 +1,77 @@
+version: '3.9'
+
+services:
+  # ============================================
+  # Django REST API with Uvicorn
+  # ============================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hotel-reservation-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,api
+      - DATABASE_URL=postgresql://hotel_user:hotel_password@db:5432/hotel_db
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./reservation_system:/app/reservation_system
+    networks:
+      - hotel-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # ============================================
+  # PostgreSQL Database (Optional - for production)
+  # Uncomment to use PostgreSQL instead of SQLite3
+  # ============================================
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: hotel-reservation-db
+  #   environment:
+  #     POSTGRES_DB: hotel_db
+  #     POSTGRES_USER: hotel_user
+  #     POSTGRES_PASSWORD: hotel_password
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   networks:
+  #     - hotel-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U hotel_user"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
+
+  # ============================================
+  # Redis Cache (Optional - for caching)
+  # ============================================
+  # cache:
+  #   image: redis:7-alpine
+  #   container_name: hotel-reservation-cache
+  #   networks:
+  #     - hotel-network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
+
+volumes:
+  db_data:
+
+networks:
+  hotel-network:
+    driver: bridge
+
