@@ -10,6 +10,14 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 # Copy dependency manifests first for efficient caching
 COPY pyproject.toml uv.lock ./
 
+# Install system build dependencies required for mysqlclient
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  default-libmysqlclient-dev \
+  build-essential \
+  pkg-config \
+  && rm -rf /var/lib/apt/lists/*
+
 # Use `uv` to create and sync the isolated environment
 RUN uv sync --yes
 
