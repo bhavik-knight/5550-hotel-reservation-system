@@ -57,9 +57,8 @@ curl -X POST http://localhost:8000/api/reservationConfirmation/ \
     "checkout": "2026-04-18",
     "guests_list": [
       {
-        "name": "John Doe",
-        "phone_number": "555-1234",
-        "email": "john@example.com"
+        "guest_name": "John Doe",
+        "gender": "Male"
       }
     ]
   }'
@@ -72,7 +71,7 @@ curl -X POST http://localhost:8000/api/reservationConfirmation/ \
   "hotel_name": "Grand Hotel",
   "checkin": "2026-04-15",
   "checkout": "2026-04-18",
-  "guests_list": [...]
+  "guests_details": [...]
 }
 ```
 
@@ -103,7 +102,6 @@ hotel_reservation_system/
 └── reservation_system/    # Django project
     ├── manage.py
     ├── apps/
-    │   ├── addresses/    # Address models
     │   ├── hotels/       # Hotel models
     │   └── reservations/ # Reservations & People
     └── reservation_system/

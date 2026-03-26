@@ -1,31 +1,24 @@
 from django.db import models
-from addresses.models import Address
+from hotels.models import Hotel
 
 
-class Person(models.Model):
+class Guest(models.Model):
     """Represents a guest who can be associated with reservations.
 
     Attributes:
-        name: Full name of the person.
+        name: Full name of the guest.
+        gender: Gender of the guest.
         phone_number: Contact phone number.
         email: Unique email address.
-        address: Optional reference to an Address record.
     """
 
     name = models.CharField(max_length=255)
+    gender = models.CharField(max_length=20, blank=True)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
-    # Adding address to Person
-    address = models.ForeignKey(
-        Address,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="persons",
-    )
 
     def __str__(self) -> str:
-        """Return a readable person label.
+        """Return a readable guest label.
 
         Returns:
             str: Formatted name and email.
@@ -38,6 +31,7 @@ class Reservation(models.Model):
 
     Attributes:
         hotel_name: Hotel identifier or name.
+        hotel: Related hotel record when available.
         checkin: Check-in date.
         checkout: Check-out date.
         confirmation_number: Unique confirmation token.
@@ -45,13 +39,21 @@ class Reservation(models.Model):
     """
 
     hotel_name = models.CharField(max_length=255)
+    hotel = models.ForeignKey(
+        Hotel,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="reservations",
+    )
     checkin = models.DateField()
     checkout = models.DateField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     confirmation_number = models.CharField(max_length=100, unique=True)
 
-    # Many-to-Many allows a Person to have many reservations
-    # and a Reservation to have many guests (People).
-    guests = models.ManyToManyField(Person, related_name="reservations")
+    # Many-to-Many allows a guest to have many reservations
+    # and a reservation to have many guests.
+    guests = models.ManyToManyField(Guest, related_name="reservations")
 
     def __str__(self) -> str:
         """Return a readable reservation label.
@@ -59,4 +61,5 @@ class Reservation(models.Model):
         Returns:
             str: Formatted hotel name and confirmation number.
         """
-        return f"{self.hotel_name} - {self.confirmation_number}"
+        hotel_label = self.hotel.name if self.hotel else self.hotel_name
+        return f"{hotel_label} - {self.confirmation_number}"

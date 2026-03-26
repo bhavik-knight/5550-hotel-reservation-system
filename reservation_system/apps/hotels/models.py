@@ -1,5 +1,4 @@
 from django.db import models
-from addresses.models import Address
 
 
 class Hotel(models.Model):
@@ -11,7 +10,6 @@ class Hotel(models.Model):
         phone: Contact phone number.
         email: Contact email address.
         base_rate: Base nightly rate.
-        address: One-to-one relationship to Address.
     """
 
     name = models.CharField(max_length=255)
@@ -19,9 +17,6 @@ class Hotel(models.Model):
     phone = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
     base_rate = models.DecimalField(max_digits=10, decimal_places=2)
-    address = models.OneToOneField(
-        Address, on_delete=models.CASCADE, related_name="hotel"
-    )
 
     def __str__(self) -> str:
         """Return a readable hotel label.

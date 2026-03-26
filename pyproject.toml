@@ -8,6 +8,8 @@ dependencies = [
     "django>=6.0.3",
     "djangorestframework>=3.17.1",
     "djangorestframework-stubs>=3.16.8",
+    "coreapi>=2.3.3",
+    "coreschema>=0.0.4",
     "drf-spectacular>=0.29.0",
     "Faker>=37.6.0",
     "gunicorn>=25.2.0",
@@ -15,5 +17,6 @@ dependencies = [
     "ruff>=0.15.7",
     "ty>=0.0.25",
     "uvicorn>=0.42.0",
+    "whitenoise>=6.11.0",
 ]
 

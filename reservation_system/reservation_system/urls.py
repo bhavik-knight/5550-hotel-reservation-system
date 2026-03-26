@@ -23,11 +23,11 @@ from django.http import JsonResponse
 # drf-spectacular schema + UI
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # This prefixes your endpoint so it becomes /api/reservationConfirmation/
+    # API endpoints
     path("api/", include("reservations.urls")),
-    # Hotels endpoints (e.g. /api/getListOfHotels/)
     path("api/", include("hotels.urls")),
     # Schema & Swagger UI
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
@@ -36,7 +36,7 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
-    # Root redirect to docs
+    # Root redirect to Swagger UI
     path("", RedirectView.as_view(url="/api/docs/", permanent=False)),
 ]
 

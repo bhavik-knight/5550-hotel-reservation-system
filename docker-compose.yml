@@ -26,7 +26,9 @@ services:
       - hotel-network
     command: >
       sh -c "uv run python reservation_system/manage.py migrate &&
-             uv run uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000"
+             uv run python reservation_system/manage.py seed_large_data &&
+             uv run python reservation_system/manage.py collectstatic --noinput &&
+             uv run uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000 --reload" # remove --reload in production
     restart: unless-stopped
 
   db:
