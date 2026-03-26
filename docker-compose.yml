@@ -1,9 +1,4 @@
-version: '3.9'
-
 services:
-  # ============================================
-  # Django REST API with Uvicorn
-  # ============================================
   api:
     build:
       context: .
@@ -12,12 +7,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEBUG=False
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-dev-key-change-in-production}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,api
-      - PYTHONPATH=reservation_system
-      - DB_NAME=${DB_NAME:-mcda5550_hotel_db}
-      - DB_USER=${DB_USER:-bhavik}
+      - DEBUG=True
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,api,hotel-reservation-api
+      - PYTHONPATH=/app/reservation_system
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=3306
@@ -25,56 +20,35 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./reservation_system:/app/reservation_system
+      - .:/app
+      - /app/.venv
     networks:
       - hotel-network
-    # Explicitly run Uvicorn via `uv` to ensure uv-managed environment is used
-    command: ["uv", "run", "uvicorn", "reservation_system.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
-
-    healthcheck:
-      # Use `uv run python` to execute a small health probe inside the uv environment
-      test: ["CMD-SHELL", "uv run python -c \"import urllib.request,sys; r=urllib.request.urlopen('http://127.0.0.1:8000/api/'); sys.exit(0 if r.getcode()==200 else 1)\""]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    command: >
+      sh -c "uv run python reservation_system/manage.py migrate &&
+             uv run uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000"
     restart: unless-stopped
 
-  # ============================================
-  # MySQL 8.0 Database (local development)
   db:
     image: mysql:8.0
     container_name: hotel-reservation-db
     environment:
-      - MYSQL_DATABASE=${DB_NAME:-mcda5550_hotel_db}
-      - MYSQL_USER=${DB_USER:-bhavik}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - hotel-network
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} || exit 1"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
     restart: unless-stopped
-
-  # ============================================
-  # Redis Cache (Optional - for caching)
-  # ============================================
-  # cache:
-  #   image: redis:7-alpine
-  #   container_name: hotel-reservation-cache
-  #   networks:
-  #     - hotel-network
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   restart: unless-stopped
 
 volumes:
   db_data:
@@ -82,4 +56,3 @@ volumes:
 networks:
   hotel-network:
     driver: bridge
-

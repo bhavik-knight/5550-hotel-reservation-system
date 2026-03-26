@@ -14,17 +14,18 @@ import sys
 from pathlib import Path
 import os
 
+
 # Load a local .env file if present (simple loader, no extra dependency required)
 def _load_dotenv(path):
     try:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             for line in f:
                 line = line.strip()
-                if not line or line.startswith('#'):
+                if not line or line.startswith("#"):
                     continue
-                if '=' not in line:
+                if "=" not in line:
                     continue
-                key, val = line.split('=', 1)
+                key, val = line.split("=", 1)
                 key = key.strip()
                 val = val.strip().strip('"').strip("'")
                 # Only set if not already in environment
@@ -33,15 +34,16 @@ def _load_dotenv(path):
     except FileNotFoundError:
         pass
 
+
 # Try to load .env from project root and repository root (support both layouts)
 BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env from the app root (next to manage.py)
-_load_dotenv(BASE_DIR / '.env')
+_load_dotenv(BASE_DIR / ".env")
 # Also attempt to load .env from the repository root (one level above)
-_load_dotenv(BASE_DIR.parent / '.env')
+_load_dotenv(BASE_DIR.parent / ".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-APPS_DIR = BASE_DIR / 'apps'
+APPS_DIR = BASE_DIR / "apps"
 
 # Add the 'apps' directory to the python path so you can import 'hotels' instead of 'apps.hotels'
 sys.path.insert(0, str(APPS_DIR))
@@ -51,7 +53,7 @@ sys.path.insert(0, str(APPS_DIR))
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^uk!7b@f_@+2_es537&07^q=+q-&6^^1+sr8edc+*z8$rn-vcd'
+SECRET_KEY = "django-insecure-^uk!7b@f_@+2_es537&07^q=+q-&6^^1+sr8edc+*z8$rn-vcd"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -62,72 +64,72 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'hotels',
-    'reservations',
-    'addresses',
-    'drf_spectacular',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "hotels",
+    "reservations",
+    "addresses",
+    "drf_spectacular",
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'MCDA5550 Hotel API',
-    'DESCRIPTION': 'API documentation for the MCDA5550 Hotel Reservation System',
-    'VERSION': '1.0.0',
+    "TITLE": "MCDA5550 Hotel API",
+    "DESCRIPTION": "API documentation for the MCDA5550 Hotel Reservation System",
+    "VERSION": "1.0.0",
 }
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'reservation_system.urls'
+ROOT_URLCONF = "reservation_system.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'reservation_system.wsgi.application'
+WSGI_APPLICATION = "reservation_system.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'mcda5580'),
-        'USER': os.environ.get('DB_USER', 'bhavik'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("DB_NAME", "mcda5580"),
+        "USER": os.environ.get("DB_USER", "bhavik"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
+        "PORT": os.environ.get("DB_PORT", "3306"),
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
@@ -138,16 +140,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -155,9 +157,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -167,4 +169,4 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"

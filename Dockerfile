@@ -1,45 +1,35 @@
-# Base image that includes `uv` for dependency management
-FROM ghcr.io/astral/uv:latest as base
+FROM python:3.14-slim
+
+# The installer requires curl (and certificates) to download the release archive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    build-essential \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download the latest installer
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+
+# Run the installer then remove it
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+# Ensure the installed binary is on the `PATH`
+ENV PATH="/root/.local/bin/:$PATH"
 
 # Set working directory
 WORKDIR /app
 
-# Environment
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
-# Ensure the project package is importable inside the container
-ENV PYTHONPATH=/app/reservation_system
-
-# Copy dependency manifests first for efficient caching
+# Copy project files
 COPY pyproject.toml uv.lock ./
+COPY . .
 
-# Install system build dependencies required for mysqlclient
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  default-libmysqlclient-dev \
-  build-essential \
-  pkg-config \
-  && rm -rf /var/lib/apt/lists/*
+# Install dependencies using uv
+RUN uv sync --frozen --no-cache
 
-# Use `uv` to create and sync the isolated environment
-RUN uv sync --yes
-
-# Copy application code
-COPY reservation_system/ ./reservation_system/
-
-# Create a non-root user and fix permissions
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
-
-# Run migrations inside the uv environment
-RUN uv run python reservation_system/manage.py migrate --noinput
-
-# Expose application port
+# Expose port
 EXPOSE 8000
 
-# Healthcheck (uses uv run to ensure environment commands execute correctly)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD uv run python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/').read()" || exit 1
-
-# Start the app via uv to ensure the uv-managed environment is used
-CMD ["uv", "run", "uvicorn", "reservation_system.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
-
+# Run the application
+CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

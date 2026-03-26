@@ -4,22 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Address',
+            name="Address",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('street_address', models.CharField(max_length=255)),
-                ('city', models.CharField(max_length=100)),
-                ('province', models.CharField(max_length=100)),
-                ('postal_code', models.CharField(max_length=20)),
-                ('country', models.CharField(default='Canada', max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("street_address", models.CharField(max_length=255)),
+                ("city", models.CharField(max_length=100)),
+                ("province", models.CharField(max_length=100)),
+                ("postal_code", models.CharField(max_length=20)),
+                ("country", models.CharField(default="Canada", max_length=100)),
             ],
         ),
     ]

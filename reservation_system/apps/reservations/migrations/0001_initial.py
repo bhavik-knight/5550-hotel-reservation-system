@@ -5,33 +5,62 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('addresses', '0001_initial'),
+        ("addresses", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Person',
+            name="Person",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('phone_number', models.CharField(max_length=20)),
-                ('email', models.EmailField(max_length=254, unique=True)),
-                ('address', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='persons', to='addresses.address')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("phone_number", models.CharField(max_length=20)),
+                ("email", models.EmailField(max_length=254, unique=True)),
+                (
+                    "address",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="persons",
+                        to="addresses.address",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Reservation',
+            name="Reservation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('hotel_name', models.CharField(max_length=255)),
-                ('checkin', models.DateField()),
-                ('checkout', models.DateField()),
-                ('confirmation_number', models.CharField(max_length=100, unique=True)),
-                ('guests', models.ManyToManyField(related_name='reservations', to='reservations.person')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("hotel_name", models.CharField(max_length=255)),
+                ("checkin", models.DateField()),
+                ("checkout", models.DateField()),
+                ("confirmation_number", models.CharField(max_length=100, unique=True)),
+                (
+                    "guests",
+                    models.ManyToManyField(
+                        related_name="reservations", to="reservations.person"
+                    ),
+                ),
             ],
         ),
     ]
