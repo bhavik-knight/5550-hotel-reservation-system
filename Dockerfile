@@ -39,4 +39,4 @@ COPY --from=builder /app /app
 WORKDIR /app/reservation_system
 
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["uvicorn", "reservation_system.asgi:application", "--host", "0.0.0.0", "--port", "8000"]

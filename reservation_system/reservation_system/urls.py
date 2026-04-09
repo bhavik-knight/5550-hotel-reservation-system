@@ -27,8 +27,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns = [
     path("admin/", admin.site.urls),
     # API endpoints
-    path("api/", include("reservations.urls")),
-    path("api/", include("hotels.urls")),
+    path("api/", include("apps.reservations.urls")),
+    path("api/", include("apps.hotels.urls")),
     # Schema & Swagger UI
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

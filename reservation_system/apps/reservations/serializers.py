@@ -4,7 +4,7 @@ from typing import Any
 from django.utils import timezone
 from rest_framework import serializers
 
-from hotels.models import Hotel
+from apps.hotels.models import Hotel
 from .models import Guest, Reservation
 
 

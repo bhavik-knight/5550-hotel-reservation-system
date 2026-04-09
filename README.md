@@ -41,6 +41,15 @@ docker compose up --build
 How to Run
 ----------
 
+Local (uv)
+
+```bash
+uv sync
+uv run python reservation_system/manage.py migrate
+uv run python reservation_system/manage.py seed_large_data --clear-db
+uv run uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000
+```
+
 Docker Compose
 
 ```bash
@@ -157,7 +166,7 @@ Docker Compose
 - Two containers:
   - `api` for the Django backend.
   - `db` for MySQL 8.0.
-- The `api` service runs migrations, seeds data, collects static files, and starts Uvicorn.
+- The `api` service runs migrations and starts Uvicorn.
 - The `db` service persists data in a named volume.
 
 Validation Rules

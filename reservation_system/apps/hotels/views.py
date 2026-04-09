@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.request import Request
 from rest_framework.response import Response
 from .models import Hotel
-from reservations.models import Reservation
+from apps.reservations.models import Reservation
 from .serializers import HotelSerializer
 from drf_spectacular.utils import extend_schema, extend_schema_view
 

@@ -71,8 +71,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "hotels",
-    "reservations",
+    "apps.hotels",
+    "apps.reservations",
     "drf_spectacular",
     "reservation_system",
 ]
@@ -121,32 +121,29 @@ WSGI_APPLICATION = "reservation_system.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME", "mcda5580"),
-        "USER": os.environ.get("DB_USER", "bhavik"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("DB_PORT", "3306"),
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-    }
-}
-
 if os.environ.get("PYTHONANYWHERE_DOMAIN"):
     pa_user = os.environ.get("PYTHONANYWHERE_USERNAME", "[username]")
-    DATABASES["default"] = {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": f"{pa_user}$default",
-        "USER": pa_user,
-        "PASSWORD": os.environ.get("PYTHONANYWHERE_MYSQL_PASSWORD", "[your-mysql-password]"),
-        "HOST": f"{pa_user}.mysql.pythonanywhere-services.com",
-        "PORT": "3306",
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": f"{pa_user}$default",
+            "USER": pa_user,
+            "PASSWORD": os.environ.get(
+                "PYTHONANYWHERE_MYSQL_PASSWORD", "[your-mysql-password]"
+            ),
+            "HOST": f"{pa_user}.mysql.pythonanywhere-services.com",
+            "PORT": "3306",
+            "OPTIONS": {
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
 
 

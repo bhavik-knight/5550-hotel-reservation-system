@@ -8,8 +8,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from faker import Faker
 
-from hotels.models import Hotel  # type: ignore[import-not-found]
-from reservations.models import Guest, Reservation  # type: ignore[import-not-found]
+from apps.hotels.models import Hotel
+from apps.reservations.models import Guest, Reservation
 
 
 class Command(BaseCommand):
@@ -83,16 +83,6 @@ class Command(BaseCommand):
                 )
                 hotels.append(hotel)
 
-            guests: list[Guest] = []
-            for _ in range(80):
-                full_name = faker.name()
-                guest = Guest.objects.create(
-                    name=full_name,
-                    phone_number=faker.phone_number(),
-                    email=faker.unique.email(),
-                )
-                guests.append(guest)
-
             for _ in range(250):
                 checkin = date(2026, 1, 1) + timedelta(days=randint(0, 364))
                 checkout = checkin + timedelta(days=randint(1, 10))
@@ -106,7 +96,13 @@ class Command(BaseCommand):
                     confirmation_number=f"CONF-{faker.unique.bothify(text='????-####').upper()}",
                 )
                 guest_count = randint(1, 3)
-                reservation.guests.add(*sample(guests, k=guest_count))
+                for _ in range(guest_count):
+                    Guest.objects.create(
+                        name=faker.name(),
+                        phone_number=faker.phone_number(),
+                        email=faker.unique.email(),
+                        reservation=reservation,
+                    )
 
         self.stdout.write(
             self.style.SUCCESS(
