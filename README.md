@@ -38,6 +38,34 @@ Build and run the API and database with Docker Compose:
 docker compose up --build
 ```
 
+How to Run
+----------
+
+Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Reservation Request JSON (reservationConfirmation)
+
+```json
+{
+  "hotel_name": "Grand Hotel Downtown",
+  "checkin": "2026-04-15",
+  "checkout": "2026-04-18",
+  "price": "299.99",
+  "guests_list": [
+    { "guest_name": "John Doe", "gender": "Male" },
+    { "guest_name": "Jane Smith", "gender": "Female" }
+  ]
+}
+```
+
+API Documentation
+
+OpenAPI/Swagger UI is available at `http://localhost:8000/api/docs/`.
+
 Architecture and Models
 -----------------------
 
@@ -56,11 +84,11 @@ Guest
 - `id`, `name`, `gender`, `phone_number`, `email`
 
 Reservation
-- `id`, `hotel_name`, `hotel` (optional FK), `checkin`, `checkout`, `price`, `confirmation_number`, `guests`
+- `id`, `hotel_name`, `hotel` (FK), `checkin`, `checkout`, `price`, `confirmation_number`, `guests`
 
 Relationships
-- A Reservation can reference a Hotel (optional FK).
-- A Reservation has many Guests, and a Guest can appear on many Reservations (many-to-many).
+- A Reservation references a Hotel via a foreign key.
+- A Reservation has many Guests, and each Guest belongs to one Reservation.
 
 Project Structure
 -----------------
@@ -118,9 +146,9 @@ Docker Details
 
 Dockerfile
 
-- Uses `python:3.14-slim` base image.
+- Uses `python:3.13-slim` base image.
 - Installs system dependencies for MySQL client builds.
-- Installs uv and syncs dependencies.
+- Installs uv and syncs dependencies from pyproject.toml/uv.lock.
 - Copies the project into `/app`.
 - Exposes port 8000 and defines a default `uvicorn` command.
 

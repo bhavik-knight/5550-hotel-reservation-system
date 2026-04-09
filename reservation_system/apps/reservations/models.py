@@ -16,6 +16,11 @@ class Guest(models.Model):
     gender = models.CharField(max_length=20, blank=True)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
+    reservation = models.ForeignKey(
+        "Reservation",
+        on_delete=models.CASCADE,
+        related_name="guests",
+    )
 
     def __str__(self) -> str:
         """Return a readable guest label.
@@ -50,10 +55,6 @@ class Reservation(models.Model):
     checkout = models.DateField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     confirmation_number = models.CharField(max_length=100, unique=True)
-
-    # Many-to-Many allows a guest to have many reservations
-    # and a reservation to have many guests.
-    guests = models.ManyToManyField(Guest, related_name="reservations")
 
     def __str__(self) -> str:
         """Return a readable reservation label.

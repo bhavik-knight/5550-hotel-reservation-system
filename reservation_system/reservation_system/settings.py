@@ -135,6 +135,20 @@ DATABASES = {
     }
 }
 
+if os.environ.get("PYTHONANYWHERE_DOMAIN"):
+    pa_user = os.environ.get("PYTHONANYWHERE_USERNAME", "[username]")
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": f"{pa_user}$default",
+        "USER": pa_user,
+        "PASSWORD": os.environ.get("PYTHONANYWHERE_MYSQL_PASSWORD", "[your-mysql-password]"),
+        "HOST": f"{pa_user}.mysql.pythonanywhere-services.com",
+        "PORT": "3306",
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators

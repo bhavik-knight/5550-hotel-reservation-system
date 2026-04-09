@@ -1,4 +1,7 @@
 services:
+  # ============================================
+  # Django REST API with Uvicorn
+  # ============================================
   api:
     build:
       context: .
@@ -7,10 +10,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEBUG=True
+      - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,api,hotel-reservation-api
-      - PYTHONPATH=/app/reservation_system
+      - ALLOWED_HOSTS=localhost,127.0.0.1,api
+      - PYTHONPATH=/app
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -20,17 +23,28 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - .:/app
+      # Mount source code only - NOT the entire directory
+      - ./reservation_system:/app/reservation_system
+      # Exclude virtual environment from being overridden
       - /app/.venv
     networks:
       - hotel-network
+    # Run migrations and then start Uvicorn
     command: >
-      sh -c "uv run python reservation_system/manage.py migrate &&
-             uv run python reservation_system/manage.py seed_large_data &&
-             uv run python reservation_system/manage.py collectstatic --noinput &&
-             uv run uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000 --reload" # remove --reload in production
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/api/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     restart: unless-stopped
 
+  # ============================================
+  # MySQL 8.0 Database (local development)
+  # ============================================
   db:
     image: mysql:8.0
     container_name: hotel-reservation-db
@@ -40,17 +54,34 @@ services:
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
     ports:
-      - "3306:3306"
+      # Changed from 3306:3306 to 3307:3306 to avoid conflict
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - hotel-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
     restart: unless-stopped
+
+  # ============================================
+  # Redis Cache (Optional - for caching)
+  # ============================================
+  # cache:
+  #   image: redis:7-alpine
+  #   container_name: hotel-reservation-cache
+  #   networks:
+  #     - hotel-network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
 
 volumes:
   db_data:

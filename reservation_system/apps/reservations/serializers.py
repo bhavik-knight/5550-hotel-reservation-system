@@ -215,6 +215,14 @@ class ReservationSerializer(serializers.ModelSerializer):
 
         return attrs
 
+    def to_representation(self, instance: Reservation) -> dict[str, Any]:
+        """Map confirmation_number to the required response key."""
+        data = super().to_representation(instance)
+        confirmation = data.pop("confirmation_number", None)
+        if confirmation is not None:
+            data["confirmation number"] = confirmation
+        return data
+
     def validate_hotel_name(self, value: str) -> str:
         """Validate hotel name input.
 
@@ -247,22 +255,31 @@ class ReservationSerializer(serializers.ModelSerializer):
         if not hotel_name:
             raise serializers.ValidationError("Hotel name is required.")
 
+        try:
+            hotel = Hotel.objects.get(name__iexact=hotel_name)
+        except Hotel.DoesNotExist as exc:
+            raise serializers.ValidationError(
+                {"hotel_name": "hotel_name does not match an existing hotel."}
+            ) from exc
+
         conf_num = f"CONF-{uuid.uuid4().hex[:8].upper()}"
 
         reservation = Reservation.objects.create(
-            confirmation_number=conf_num, **validated_data
+            confirmation_number=conf_num,
+            hotel=hotel,
+            **validated_data,
         )
 
         for guest in guests_list:
             guest_name = guest.get("guest_name")
             gender = guest.get("gender", "")
             email = f"guest-{uuid.uuid4().hex[:12]}@example.com"
-            guest_record = Guest.objects.create(
+            Guest.objects.create(
                 name=guest_name,
                 gender=gender,
                 phone_number="000-000-0000",
                 email=email,
+                reservation=reservation,
             )
-            reservation.guests.add(guest_record)
 
         return reservation

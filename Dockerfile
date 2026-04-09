@@ -1,6 +1,8 @@
-FROM python:3.14-slim
+FROM python:3.13-slim AS builder
 
-# The installer requires curl (and certificates) to download the release archive
+ENV PATH="/root/.local/bin:$PATH"
+WORKDIR /app
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -9,27 +11,32 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Download the latest installer
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
-
-# Run the installer then remove it
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 
-# Ensure the installed binary is on the `PATH`
-ENV PATH="/root/.local/bin/:$PATH"
+RUN uv venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Set working directory
-WORKDIR /app
-
-# Copy project files
 COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-cache --no-install-project --python /opt/venv/bin/python
+
 COPY . .
+RUN uv sync --frozen --no-cache --python /opt/venv/bin/python
 
-# Install dependencies using uv
-RUN uv sync --frozen --no-cache
+FROM python:3.13-slim AS runtime
 
-# Expose port
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libmariadb3 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app /app
+
+WORKDIR /app/reservation_system
+
 EXPOSE 8000
-
-# Run the application
-CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
