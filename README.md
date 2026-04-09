@@ -1,189 +1,79 @@
-Hotel Reservation System API
-============================
+# Hotel Reservation System API
 
-Setup
------
+A comprehensive REST API for a hotel reservation system, built with Django REST Framework and Docker.
 
-Install uv
+---
 
-Windows (PowerShell):
+## 1. Prerequisites (Install uv)
 
-```powershell
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
+The project uses **uv** for extremely fast dependency management.
 
-macOS / Linux:
-
+**macOS / Linux / Windows (WSL):**
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Install dependencies
+**Windows (PowerShell):**
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
 
+---
+
+## 2. Setup & Run (Automated)
+
+We provide a script that handles dependency installation, database migrations, and data seeding in one go.
+
+```bash
+chmod +x setup_local.sh
+./setup_local.sh
+```
+
+---
+
+## 3. Manual Setup (Step-by-Step)
+
+If you prefer to run the commands individually:
+
+### Install Dependencies
 ```bash
 uv sync
 ```
 
-Run with live reload
-
+### Apply Migrations & Seed Data
 ```bash
-uv run uvicorn reservation_system.asgi:application --reload
-```
-
-Docker and Docker Compose
-
-Build and run the API and database with Docker Compose:
-
-```bash
-docker compose up --build
-```
-
-How to Run
-----------
-
-Local (uv)
-
-```bash
-uv sync
 uv run python reservation_system/manage.py migrate
-uv run python reservation_system/manage.py seed_large_data --clear-db
-uv run uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000
+uv run python reservation_system/manage.py seed_data --hotels 20 --reservations 250
 ```
 
-Docker Compose
+### Start the Server
+```bash
+uv run uvicorn --app-dir reservation_system reservation_system.asgi:application --reload
+```
+
+---
+
+## 4. Docker Deployment
+
+To run the entire stack (API + MySQL Database) using Docker Compose:
 
 ```bash
 docker compose up --build
 ```
+*Note: Docker environment automatically performs migrations and seeding on startup.*
 
-Reservation Request JSON (reservationConfirmation)
+---
 
-```json
-{
-  "hotel_name": "Grand Hotel Downtown",
-  "checkin": "2026-04-15",
-  "checkout": "2026-04-18",
-  "price": "299.99",
-  "guests_list": [
-    { "guest_name": "John Doe", "gender": "Male" },
-    { "guest_name": "Jane Smith", "gender": "Female" }
-  ]
-}
-```
+## API Documentation
+Once the server is running, access the interactive Swagger documentation at:
+👉 **[http://localhost:8000/api/docs/](http://localhost:8000/api/docs/)**
 
-API Documentation
+### Validation Rules
+- **Reservation**: `hotel_name`, `guests_list`, and `price` (non-negative) are required.
+- **Dates**: `checkin` must be in the future (max 1 year) and `checkout` must be after `checkin`.
+- **Guest**: `name` (min 2 chars) and `phone_number` (min 7 digits) are required.
 
-OpenAPI/Swagger UI is available at `http://localhost:8000/api/docs/`.
+---
 
-Architecture and Models
------------------------
-
-Architecture
-
-- Django + Django REST Framework API
-- MySQL database (via Docker Compose)
-- OpenAPI/Swagger UI at `/api/docs/`
-
-Models and Relationships
-
-Hotel
-- `id`, `name`, `description`, `phone`, `email`, `base_rate`
-
-Guest
-- `id`, `name`, `gender`, `phone_number`, `email`
-
-Reservation
-- `id`, `hotel_name`, `hotel` (FK), `checkin`, `checkout`, `price`, `confirmation_number`, `guests`
-
-Relationships
-- A Reservation references a Hotel via a foreign key.
-- A Reservation has many Guests, and each Guest belongs to one Reservation.
-
-Project Structure
------------------
-
-```
-.
-├── Dockerfile
-├── docker-compose.yml
-├── pyproject.toml
-├── README.md
-└── reservation_system
-    ├── manage.py
-    ├── apps
-    │   ├── hotels
-    │   └── reservations
-    └── reservation_system
-        ├── settings.py
-        └── urls.py
-```
-
-API Endpoints
--------------
-
-Base URL: `http://localhost:8000/api/`
-
-Swagger UI: `/api/docs/`
-
-Hotels
-
-- **GET** `/api/getListOfHotels/` - list hotels, optional `checkin` and `checkout` query params for availability
-- **GET** `/api/hotels/` - list hotels
-- **POST** `/api/hotels/` - create a hotel
-- **GET** `/api/hotels/<id>/` - get a hotel by id
-- **PUT** `/api/hotels/<id>/` - update a hotel
-- **PATCH** `/api/hotels/<id>/` - partial update a hotel
-- **DELETE** `/api/hotels/<id>/` - delete a hotel
-
-Reservations
-
-- **POST** `/api/reservationConfirmation/` - create a reservation and return confirmation number
-- **GET** `/api/reservations/` - list reservations
-- **GET** `/api/reservations/<confirmation_number>/` - get a reservation by confirmation number
-
-Guests
-
-- **GET** `/api/guests/` - list guests
-- **POST** `/api/guests/` - create a guest
-- **GET** `/api/guests/<id>/` - get a guest by id
-- **PUT** `/api/guests/<id>/` - update a guest
-- **PATCH** `/api/guests/<id>/` - partial update a guest
-- **DELETE** `/api/guests/<id>/` - delete a guest
-
-Docker Details
---------------
-
-Dockerfile
-
-- Uses `python:3.13-slim` base image.
-- Installs system dependencies for MySQL client builds.
-- Installs uv and syncs dependencies from pyproject.toml/uv.lock.
-- Copies the project into `/app`.
-- Exposes port 8000 and defines a default `uvicorn` command.
-
-Docker Compose
-
-- Two containers:
-  - `api` for the Django backend.
-  - `db` for MySQL 8.0.
-- The `api` service runs migrations and starts Uvicorn.
-- The `db` service persists data in a named volume.
-
-Validation Rules
-----------------
-
-Reservation
-
-- `hotel_name` is required and cannot be blank.
-- `guests_list` is required.
-- `price` is required and cannot be negative.
-- `checkin` cannot be in the past.
-- `checkin` cannot be more than 1 year in the future.
-- `checkout` must be after `checkin`.
-- `guest_name` cannot be empty.
-- `gender` must be Male, Female, Other, or Prefer not to say.
-
-Guest
-
-- `name` must be at least 2 characters.
-- `phone_number` must have at least 7 digits.
+## License
+MIT

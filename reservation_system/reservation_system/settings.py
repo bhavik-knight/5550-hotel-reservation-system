@@ -138,7 +138,23 @@ if os.environ.get("PYTHONANYWHERE_DOMAIN"):
             },
         }
     }
+elif os.environ.get("DB_HOST"):
+    # MySQL configuration (typically for Docker)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": os.environ.get("DB_NAME", "hotel_db"),
+            "USER": os.environ.get("DB_USER", "hotel_user"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", "hotel_pass"),
+            "HOST": os.environ.get("DB_HOST", "db"),
+            "PORT": os.environ.get("DB_PORT", "3306"),
+            "OPTIONS": {
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
 else:
+    # Default SQLite for local development
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",

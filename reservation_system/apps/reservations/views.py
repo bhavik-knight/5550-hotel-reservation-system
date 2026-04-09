@@ -5,7 +5,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from .models import Guest, Reservation
 from .serializers import GuestSerializer, ReservationSerializer
-from drf_spectacular.utils import OpenApiExample, extend_schema
+from drf_spectacular.utils import OpenApiExample, extend_schema, extend_schema_view
 
 
 # Manage the Global Guest Directory (Add/Edit/Delete Guests)
@@ -34,54 +34,56 @@ class GuestDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # Manage Reservations
-@extend_schema(
-    summary="reservationConfirmation",
-    description="Create a reservation and receive a confirmation number",
-    operation_id="reservationConfirmation",
-    examples=[
-        OpenApiExample(
-            "ReservationRequest",
-            value={
-                "hotel_name": "Grand Hotel Downtown",
-                "checkin": "2026-04-15",
-                "checkout": "2026-04-18",
-                "price": "299.99",
-                "guests_list": [
-                    {"guest_name": "John Doe", "gender": "Male"},
-                    {"guest_name": "Jane Smith", "gender": "Female"},
-                ],
-            },
-            request_only=True,
-        ),
-        OpenApiExample(
-            "ReservationResponse",
-            value={
-                "id": 1,
-                "hotel_name": "Grand Hotel Downtown",
-                "checkin": "2026-04-15",
-                "checkout": "2026-04-18",
-                "price": "299.99",
-                "confirmation_number": "CONF-A1B2C3D4",
-                "guests_details": [
-                    {
-                        "id": 10,
-                        "name": "John Doe",
-                        "gender": "Male",
-                        "phone_number": "000-000-0000",
-                        "email": "guest-abc123@example.com",
-                    },
-                    {
-                        "id": 11,
-                        "name": "Jane Smith",
-                        "gender": "Female",
-                        "phone_number": "000-000-0000",
-                        "email": "guest-def456@example.com",
-                    },
-                ],
-            },
-            response_only=True,
-        ),
-    ],
+@extend_schema_view(
+    post=extend_schema(
+        summary="reservationConfirmation",
+        description="Create a reservation and receive a confirmation number",
+        operation_id="reservationConfirmation",
+        examples=[
+            OpenApiExample(
+                "ReservationRequest",
+                value={
+                    "hotel_name": "Grand Hotel Downtown",
+                    "checkin": "2026-04-15",
+                    "checkout": "2026-04-18",
+                    "price": "299.99",
+                    "guests_list": [
+                        {"guest_name": "John Doe", "gender": "Male"},
+                        {"guest_name": "Jane Smith", "gender": "Female"},
+                    ],
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                "ReservationResponse",
+                value={
+                    "id": 1,
+                    "hotel_name": "Grand Hotel Downtown",
+                    "checkin": "2026-04-15",
+                    "checkout": "2026-04-18",
+                    "price": "299.99",
+                    "confirmation_number": "CONF-A1B2C3D4",
+                    "guests_details": [
+                        {
+                            "id": 10,
+                            "name": "John Doe",
+                            "gender": "Male",
+                            "phone_number": "000-000-0000",
+                            "email": "guest-abc123@example.com",
+                        },
+                        {
+                            "id": 11,
+                            "name": "Jane Smith",
+                            "gender": "Female",
+                            "phone_number": "000-000-0000",
+                            "email": "guest-def456@example.com",
+                        },
+                    ],
+                },
+                response_only=True,
+            ),
+        ],
+    )
 )
 class ReservationCreateView(generics.CreateAPIView):
     """Function Name: reservationConfirmation
@@ -127,10 +129,12 @@ class ReservationDetailView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "confirmation_number"
 
 
-@extend_schema(
-    summary="getAllReservations",
-    description="Return a list of all reservations",
-    operation_id="getAllReservations",
+@extend_schema_view(
+    get=extend_schema(
+        summary="getAllReservations",
+        description="Return a list of all reservations",
+        operation_id="getAllReservations",
+    )
 )
 class ReservationListView(generics.ListAPIView):
     """Function Name: getAllReservations

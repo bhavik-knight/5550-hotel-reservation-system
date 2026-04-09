@@ -9,33 +9,30 @@ services:
     container_name: hotel-reservation-api
     ports:
       - "8000:8000"
+    env_file: .env
     environment:
-      - DEBUG=False
-      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=True
       - ALLOWED_HOSTS=localhost,127.0.0.1,api
-      - PYTHONPATH=/app
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=3306
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      # Mount source code only - NOT the entire directory
-      - ./reservation_system:/app/reservation_system
+      # Mount the entire project root to support uv sync and reload
+      - .:/app
       # Exclude virtual environment from being overridden
       - /app/.venv
     networks:
       - hotel-network
-    # Run migrations and then start Uvicorn
+    # Run migrations and then start Uvicorn with reload
     command: >
-      sh -c "python manage.py migrate &&
-             uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000"
+      sh -c "uv run python manage.py migrate &&
+             uv run python manage.py seed_data &&
+             uv run uvicorn reservation_system.asgi:application --host 0.0.0.0 --port 8000 --reload"
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/api/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/api/docs/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -61,7 +58,7 @@ services:
     networks:
       - hotel-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10

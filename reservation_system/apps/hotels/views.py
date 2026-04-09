@@ -10,10 +10,12 @@ from .serializers import HotelSerializer
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 
-@extend_schema(
-    summary="getListOfHotels",
-    description="This endpoint returns the list of hotels",
-    operation_id="getListOfHotels",
+@extend_schema_view(
+    get=extend_schema(
+        summary="getListOfHotels",
+        description="This endpoint returns the list of hotels",
+        operation_id="getListOfHotels",
+    )
 )
 class HotelListView(generics.ListAPIView):
     """Function Name: getListOfHotels
@@ -123,10 +125,12 @@ class HotelRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
 
 
-@extend_schema(
-    summary="getHotelById",
-    description="Retrieve hotel details by ID",
-    operation_id="getHotelById",
+@extend_schema_view(
+    get=extend_schema(
+        summary="getHotelById",
+        description="Retrieve hotel details by ID",
+        operation_id="getHotelById",
+    )
 )
 class HotelDetailView(generics.RetrieveAPIView):
     """Function Name: getHotelById

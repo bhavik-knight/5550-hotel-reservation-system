@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from apps.hotels.models import Hotel
 from .models import Guest, Reservation
 
 
@@ -13,6 +14,14 @@ class ReservationGuestTests(TestCase):
 		self.client = APIClient()
 
 	def test_reservation_creates_guest_records(self) -> None:
+		# Ensure a hotel exists for the reservation
+		Hotel.objects.create(
+			name="Test Hotel",
+			description="A test hotel",
+			phone="123456789",
+			email="test@example.com",
+			base_rate="100.00"
+		)
 		checkin = timezone.now().date() + timedelta(days=2)
 		checkout = checkin + timedelta(days=3)
 		payload = {
